@@ -1,69 +1,49 @@
-import Image from "next/image";
+import { createClient } from '@/lib/supabase/server'
+import BookingWidget from '@/components/BookingWidget'
+import ScrollEffects from '@/components/ScrollEffects'
 
-export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+export default async function HomePage() {
+  const supabase = await createClient()
+  const [{ data: services }, { data: settings }] = await Promise.all([
+    supabase.from('services').select('id, name, description, duration_minutes, price').eq('active', true).order('name'),
+    supabase.from('professional_settings').select('business_name, description').limit(1).single(),
+  ])
+  const businessName = settings?.business_name ?? 'Estudio de piel'
+  const description = settings?.description ?? 'Un tratamiento autólogo que utiliza una pequeña muestra de sangre para obtener plasma rico en plaquetas y aplicarlo en la piel del rostro.'
+  // Reemplazá estos dos datos por los canales reales del consultorio.
+  const contact = {
+    whatsappUrl: 'https://wa.me/5491100000000',
+    email: 'consultas@tudominio.com',
+  }
+
+  return <main className="page">
+    <ScrollEffects />
+    <header className="site-header">
+      <a className="wordmark" href="#inicio" aria-label={`${businessName}, ir al inicio`}><span>{businessName}</span><i aria-hidden="true" /></a>
+      <nav className="main-nav" aria-label="Navegación principal"><a href="#tratamiento">El tratamiento</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
+      <a className="nav-book" href="#reservar">Reservar <span aria-hidden="true">↘</span></a>
+    </header>
+
+    <section className="hero-panel" id="inicio" aria-labelledby="hero-title">
+      <div className="hero-copy"><p className="eyebrow light">Medicina estética · Buenos Aires</p><h1 id="hero-title">Plasma rico en plaquetas facial.</h1><p>{description}</p><a className="text-link light-link" href="#tratamiento">Ver cómo es <span aria-hidden="true">↓</span></a></div>
+      <div className="hero-image-wrap plasma-composition" aria-label="Composición abstracta inspirada en una muestra de plasma"><div className="plasma-vial"><span className="vial-cap" /><span className="vial-clear" /><span className="vial-plasma" /><span className="vial-blood" /></div><i className="plasma-halo" /><i className="plasma-dot" /></div>
+      <p className="hero-side-note">Plasma rico<br />en plaquetas.</p><a className="scroll-mark" href="#tratamiento" aria-label="Ir al tratamiento"><span>Scroll</span><i aria-hidden="true" /></a>
+    </section>
+
+    <section className="intro-section" id="tratamiento" aria-labelledby="treatment-title">
+      <div className="section-number" data-reveal>01</div><div className="intro-title" data-reveal><p className="eyebrow">Plasma rico en plaquetas</p><h2 id="treatment-title">¿Qué es el plasma rico en plaquetas?</h2></div>
+      <div className="intro-text" data-reveal><p>El plasma rico en plaquetas, también llamado PRP, se obtiene a partir de una pequeña muestra de sangre procesada en una centrífuga. Así se concentra la fracción de plasma con mayor cantidad de plaquetas.</p><p>Luego se aplica en las zonas indicadas del rostro, con una técnica definida en la consulta. Antes de realizarlo, evaluamos antecedentes, objetivos y si el tratamiento es adecuado para vos.</p></div>
+    </section>
+
+    <section className="ritual-section" aria-label="Cómo es una sesión de plasma rico en plaquetas">
+      <div className="ritual-image clinical-composition" data-reveal aria-label="Composición abstracta del proceso de plasma"><div className="clinical-grid" /><div className="clinical-vial"><span /><i /><b /></div><div className="clinical-label">PRP</div><div className="clinical-wave" /></div>
+      <div className="ritual-content" data-reveal><p className="eyebrow">El procedimiento</p><ol className="ritual-list"><li><span>01</span><div><h3>Consulta</h3><p>Revisamos tu historia clínica y las zonas a tratar.</p></div></li><li><span>02</span><div><h3>Obtención</h3><p>Tomamos la muestra y obtenemos el plasma rico en plaquetas mediante centrifugación.</p></div></li><li><span>03</span><div><h3>Aplicación</h3><p>Aplicamos el plasma rico en plaquetas —PRP— según la técnica indicada para tu caso.</p></div></li></ol></div>
+    </section>
+
+    <section className="statement-section" id="nosotros" aria-labelledby="about-title"><div className="statement-orbit" aria-hidden="true"><span>criterio clínico</span><i /></div><div data-reveal><p className="eyebrow">Nuestro enfoque</p><h2 id="about-title">Consulta, técnica<br />y seguimiento.</h2><p className="statement-text">Indicamos cada tratamiento después de evaluar tu piel y tus antecedentes. La prioridad es que entiendas el procedimiento y tengas expectativas realistas.</p></div></section>
+
+    <section className="booking-section" id="reservar" aria-labelledby="booking-title"><div className="booking-heading" data-reveal><p className="eyebrow">Agenda online</p><h2 id="booking-title">Hagamos lugar<br />para vos.</h2><p>Elegí el tratamiento, el día y el horario que mejor te quede.</p></div><div className="booking-widget-wrap" data-reveal><BookingWidget services={services ?? []} /></div></section>
+    <section className="contact-section" id="contacto" aria-labelledby="contact-title"><div data-reveal><p className="eyebrow light">¿Tenés dudas?</p><h2 id="contact-title">¿Este tratamiento es para vos?</h2><p>Escribinos y te contamos cómo es el procedimiento, qué tener en cuenta y cómo coordinar una consulta.</p><div className="contact-methods"><a className="contact-method" href={contact.whatsappUrl} target="_blank" rel="noreferrer"><span>WhatsApp</span><strong>Consultar por WhatsApp <i aria-hidden="true">↗</i></strong></a><a className="contact-method" href={`mailto:${contact.email}`}><span>Email</span><strong>{contact.email} <i aria-hidden="true">↗</i></strong></a></div><a className="contact-cta" href="#reservar">O reservá una consulta <span aria-hidden="true">↗</span></a></div></section>
+    <footer className="site-footer"><a className="wordmark" href="#inicio"><span>{businessName}</span><i aria-hidden="true" /></a><p>Medicina estética.</p><a href="#inicio" className="back-top">Volver arriba ↑</a></footer>
+  </main>
 }
