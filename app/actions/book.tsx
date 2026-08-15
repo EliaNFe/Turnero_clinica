@@ -15,11 +15,38 @@ const bookingSchema = z.object({
   phone: z.string().trim().min(6, 'Teléfono inválido').max(20),
   email: z.string().trim().email('Email inválido').optional().or(z.literal('')),
   notes: z.string().trim().max(500).optional(),
+  captchaToken: z.string().min(1, 'Falta la verificación de seguridad'),
 })
 
 type BookingInput = z.infer<typeof bookingSchema>
 
 type BookingResult = { success: true } | { success: false; error: string }
+
+// Confirma contra los servidores de Cloudflare que el token del widget
+// es real y no vencido. Esto es lo que realmente frena a los bots -
+// el widget del navegador solo, sin este chequeo, es puramente
+// decorativo (cualquiera podría llamar a esta Server Action directo,
+// sin pasar por el formulario, y saltearse el widget).
+async function verifyTurnstileToken(token: string): Promise<boolean> {
+  const secret = process.env.TURNSTILE_SECRET_KEY
+
+  if (!secret) {
+    console.error('Falta TURNSTILE_SECRET_KEY en las variables de entorno del servidor.')
+    return false
+  }
+
+  try {
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ secret, response: token }),
+    })
+    const data = await res.json()
+    return data.success === true
+  } catch {
+    return false
+  }
+}
 
 export async function bookAppointment(input: BookingInput): Promise<BookingResult> {
   const parsed = bookingSchema.safeParse(input)
@@ -28,7 +55,15 @@ export async function bookAppointment(input: BookingInput): Promise<BookingResul
     return { success: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' }
   }
 
-  const { serviceId, date, startTime, fullName, dni, phone, email, notes } = parsed.data
+  const { serviceId, date, startTime, fullName, dni, phone, email, notes, captchaToken } = parsed.data
+
+  const captchaValid = await verifyTurnstileToken(captchaToken)
+  if (!captchaValid) {
+    return {
+      success: false,
+      error: 'No pudimos verificar que sos una persona. Recargá la página e intentá de nuevo.',
+    }
+  }
 
   // No se puede reservar en el pasado, doble chequeo también acá
   // (get_available_slots ya lo filtra, pero nunca confiamos en un

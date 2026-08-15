@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Fraunces, Work_Sans } from 'next/font/google'
 import './globals.css'
 
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
-      <body className={`${fraunces.variable} ${workSans.variable}`}>{children}</body>
+      <body className={`${fraunces.variable} ${workSans.variable}`}>
+        {children}
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" async defer />
+      </body>
     </html>
   )
 }

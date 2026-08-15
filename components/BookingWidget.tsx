@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { bookAppointment } from '@/app/actions/book'
+import TurnstileWidget from '@/components/TurnstileWidget'
 
 type Service = {
   id: string
@@ -31,6 +32,7 @@ export default function BookingWidget({ services }: { services: Service[] }) {
   const [step, setStep] = useState<'select' | 'form' | 'success' | 'error'>('select')
   const [errorMessage, setErrorMessage] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const [fullName, setFullName] = useState('')
   const [dni, setDni] = useState('')
@@ -74,6 +76,11 @@ export default function BookingWidget({ services }: { services: Service[] }) {
     e.preventDefault()
     if (!selectedSlot || !serviceId || !date) return
 
+    if (!captchaToken) {
+      setErrorMessage('Esperá un instante a que termine la verificación de seguridad.')
+      return
+    }
+
     setSubmitting(true)
     setErrorMessage('')
 
@@ -86,6 +93,7 @@ export default function BookingWidget({ services }: { services: Service[] }) {
       phone,
       email: email || undefined,
       notes: notes || undefined,
+      captchaToken,
     })
 
     setSubmitting(false)
@@ -193,13 +201,24 @@ export default function BookingWidget({ services }: { services: Service[] }) {
           </div>
         </div>
 
+        <div className="field-block">
+          <TurnstileWidget onVerify={setCaptchaToken} />
+        </div>
+
         {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
 
         <div className="form-actions">
-          <button type="button" className="btn-link" onClick={() => setStep('select')}>
+          <button
+            type="button"
+            className="btn-link"
+            onClick={() => {
+              setStep('select')
+              setCaptchaToken(null)
+            }}
+          >
             ← Volver
           </button>
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
+          <button type="submit" className="btn btn-primary" disabled={submitting || !captchaToken}>
             {submitting ? 'Confirmando…' : 'Confirmar turno'}
           </button>
         </div>
