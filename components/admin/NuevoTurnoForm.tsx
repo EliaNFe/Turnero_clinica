@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { bookAppointment } from '@/app/actions/book'
+import { createAppointmentAsAdmin } from '@/app/admin/turnos/actions'
 import ClientPicker, { ClientData } from './ClientPicker'
 
 type Service = {
@@ -67,7 +67,7 @@ export default function NuevoTurnoForm({ services }: { services: Service[] }) {
     setSubmitting(true)
     setErrorMessage('')
 
-    const result = await bookAppointment({
+    const result = await createAppointmentAsAdmin({
       serviceId,
       date,
       startTime: selectedSlot.slot_start,

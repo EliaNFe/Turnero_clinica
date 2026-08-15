@@ -20,6 +20,55 @@ export async function searchClients(query: string) {
   return data ?? []
 }
 
+const createSchema = z.object({
+  serviceId: z.string().uuid(),
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Fecha inválida'),
+  startTime: z.string().regex(/^\d{2}:\d{2}(:\d{2})?$/, 'Horario inválido'),
+  fullName: z.string().trim().min(3, 'Nombre muy corto').max(120),
+  dni: z.string().trim().regex(/^\d{7,8}$/, 'DNI inválido (debe tener 7 u 8 dígitos)'),
+  phone: z.string().trim().min(6, 'Teléfono inválido').max(20),
+  email: z.string().trim().email('Email inválido').optional().or(z.literal('')),
+  notes: z.string().trim().max(500).optional(),
+})
+
+type CreateInput = z.infer<typeof createSchema>
+type CreateResult = { success: true } | { success: false; error: string }
+
+// Server Action propia del panel para crear turnos, separada de la
+// bookAppointment() pública. No pide captchaToken a propósito: quien
+// llega hasta acá ya pasó por el login del panel, que es la barrera
+// de seguridad real - pedirle además un captcha sería redundante.
+// Reutiliza la misma función de base de datos (book_appointment) que
+// usa el formulario público, así que el anti-solapamiento y el
+// matching de cliente por DNI funcionan exactamente igual.
+export async function createAppointmentAsAdmin(input: CreateInput): Promise<CreateResult> {
+  const parsed = createSchema.safeParse(input)
+  if (!parsed.success) {
+    return { success: false, error: parsed.error.issues[0]?.message ?? 'Datos inválidos.' }
+  }
+
+  const { serviceId, date, startTime, fullName, dni, phone, email, notes } = parsed.data
+  const supabase = await createClient()
+
+  const { error } = await supabase.rpc('book_appointment', {
+    p_service_id: serviceId,
+    p_appointment_date: date,
+    p_start_time: startTime,
+    p_full_name: fullName,
+    p_dni: dni,
+    p_phone: phone,
+    p_email: email || null,
+    p_notes: notes || null,
+  })
+
+  if (error) {
+    return { success: false, error: error.message || 'No se pudo crear el turno.' }
+  }
+
+  revalidatePath('/admin/turnos')
+  return { success: true }
+}
+
 const updateSchema = z.object({
   appointmentId: z.string().uuid(),
   serviceId: z.string().uuid(),
