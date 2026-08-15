@@ -29,6 +29,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <li>
               <Link href="/admin/clientes">Clientes</Link>
             </li>
+            <li>
+              <Link href="/admin/servicios">Servicios</Link>
+            </li>
           </ul>
           <form action={signOut}>
             <button type="submit" className="btn-link">
