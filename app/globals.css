@@ -156,3 +156,65 @@ textarea.admin-input{resize:vertical}
 .status-badge--active{background:var(--rose-soft);color:var(--wine-deep)}
 .status-badge--inactive{background:var(--cream-deep);color:var(--ink-soft)}
 .admin-form{max-width:480px}
+/* ===== Impeccable · giro 2: "rosado clínico" — todo conduce a reservar ===== */
+:root{--plasma:#e2b45f;--blush:#f3e3de;--blush-deep:#e6cbc5}
+.page{--ink-soft:#5f564a}
+.page .eyebrow,.page .intro-section>.section-number{display:none}
+.page ::selection{background:var(--plasma);color:var(--wine-deep)}
+
+/* Regla de color: ámbar = acción. Botón vino sobre fondos claros, ámbar solo en el círculo y en el destino */
+.btn-reserve{display:inline-flex;align-items:center;gap:16px;min-height:56px;padding:0 9px 0 28px;border-radius:999px;background:var(--wine-deep);color:var(--cream);font-size:16px;font-weight:600;letter-spacing:.005em;box-shadow:0 14px 28px -14px rgba(66,23,34,.6);transition:transform .35s cubic-bezier(.16,1,.3,1),background .25s,box-shadow .35s}
+.btn-reserve span{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:var(--plasma);color:var(--wine-deep);font-size:18px;transition:transform .45s cubic-bezier(.16,1,.3,1)}
+.btn-reserve:hover{background:var(--wine);transform:translateY(-2px);box-shadow:0 20px 34px -14px rgba(66,23,34,.65)}
+.btn-reserve:hover span{transform:translate(3px,3px)}
+.btn-reserve:active{transform:scale(.97)}
+.section-cta{grid-column:1/-1;padding-top:6px}
+.ritual-content .section-cta{padding-top:38px}
+.statement-section .btn-reserve{margin-top:40px;position:relative;z-index:1}
+
+/* Encabezado fijo: el pedido de turno siempre a un toque */
+.site-header{position:sticky;top:0;z-index:20;max-width:none;padding-inline:5.5vw;background:color-mix(in srgb,var(--blush) 88%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid rgba(66,23,34,.1)}
+.nav-book{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 22px;border:0;border-radius:999px;background:var(--wine-deep);color:var(--cream);font-size:13px;font-weight:600;transition:background .25s,transform .3s cubic-bezier(.16,1,.3,1)}
+.nav-book:hover{background:var(--wine);color:var(--cream)}
+.nav-book:active{transform:scale(.96)}
+
+/* Inicio: lienzo rosado, arco vino y disco crema */
+.hero-panel{background:var(--blush);color:var(--ink)}
+.hero-panel::before{content:'';position:absolute;right:-2vw;top:50%;width:min(48vw,660px);aspect-ratio:1;border-radius:50%;background:#faf2ec;transform:translateY(-54%)}
+.hero-copy h1{color:var(--wine-deep);font-weight:400;letter-spacing:-.035em;max-width:10ch}
+.hero-copy>p:not(.eyebrow){color:var(--ink-soft);font-size:18px}
+.hero-actions{display:flex;align-items:center;gap:30px;flex-wrap:wrap}
+.hero-panel .text-link{color:var(--wine-deep);border-color:var(--wine-deep)}
+.hero-side-note,.scroll-mark{color:var(--ink-soft);font-size:12px}
+.hero-image-wrap{animation:archIn 1.4s cubic-bezier(.16,1,.3,1) both}
+@keyframes archIn{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0 0 0 0)}}
+
+/* Secciones: escalas propias y fondos de la misma familia rosada */
+.intro-section{grid-template-columns:1.25fr 1fr}
+.intro-title h2{font-size:clamp(2.8rem,6vw,6rem);letter-spacing:-.035em;max-width:10ch;color:var(--wine-deep)}
+.intro-text{font-size:18px;color:var(--ink)}
+.ritual-section{background:var(--blush-deep)}
+.ritual-list li{border-top-color:rgba(66,23,34,.28)}
+.statement-orbit{border:2px solid var(--plasma)}
+.statement-section h2{color:var(--wine-deep);letter-spacing:-.035em}
+
+/* Destino: la agenda es el pico oscuro de la página, con el título en ámbar */
+.booking-heading h2{color:var(--plasma);font-size:clamp(3.2rem,6vw,6rem);letter-spacing:-.035em}
+.booking-heading>p:last-child{font-size:18px;max-width:30ch}
+.booking-widget-wrap{border:1px solid rgba(241,236,225,.2);border-radius:24px;padding:clamp(20px,3vw,40px)}
+
+/* Contacto: se aquieta, en rosado claro */
+.contact-section{background:var(--blush-deep)!important;color:var(--ink)}
+.contact-section h2{color:var(--wine-deep);letter-spacing:-.03em}
+.contact-section>p:not(.eyebrow){color:var(--ink)}
+.contact-method{border-color:rgba(66,23,34,.35)}
+.contact-method span{color:var(--wine);font-weight:600;font-size:12px}
+.contact-cta{border-color:var(--wine-deep);color:var(--wine-deep);font-weight:600}
+
+@media (max-width:760px){
+  .hero-panel::before{display:none}
+  .site-header{padding:0 22px}
+  .intro-section{grid-template-columns:1fr}.intro-title{grid-column:1}
+  .hero-actions{gap:20px}
+}
+@media (prefers-reduced-motion:reduce){.hero-image-wrap{animation:none}.btn-reserve,.btn-reserve span{transition:none}}
